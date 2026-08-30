@@ -1,0 +1,298 @@
+.restaurant-detail-page {
+    padding-bottom: 2rem;
+}
+
+.letter-spacing {
+    letter-spacing: 0.18rem;
+}
+
+.hero-card {
+    position: relative;
+    border-radius: 1.5rem;
+    min-height: 420px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #111827, #374151);
+}
+
+.hero-image {
+    width: 100%;
+    height: 420px;
+    object-fit: cover;
+    display: block;
+}
+
+.hero-placeholder {
+    background: linear-gradient(135deg, #e5e7eb, #cbd5e1);
+    color: #374151;
+    font-size: 0.9rem;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(17, 24, 39, 0.1), rgba(17, 24, 39, 0.8));
+    display: flex;
+    align-items: end;
+    padding: 2rem;
+}
+
+.badge-soft {
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: white;
+    border-radius: 999px;
+    padding: 0.55rem 0.9rem;
+    font-size: 0.76rem;
+    font-weight: 600;
+}
+
+.detail-panel {
+    border-radius: 1.2rem;
+}
+
+.contact-list li {
+    color: var(--app-text);
+    opacity: 0.9;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    background: var(--app-surface-muted);
+    border: 1px solid var(--app-border);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--app-text);
+}
+
+.cuisine-card {
+    width: min(280px, 70vw);
+    min-width: 220px;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    position: relative;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+.cuisine-card-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    scroll-snap-align: start;
+    transition: transform 0.25s ease;
+}
+
+.cuisine-card-link:hover,
+.cuisine-card-link:focus-visible {
+    transform: translateY(-6px);
+    text-decoration: none;
+}
+
+.cuisine-card-link.is-active .cuisine-card {
+    box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.85), 0 18px 40px rgba(15, 23, 42, 0.16);
+}
+
+.cuisine-card-image {
+    height: 250px;
+    width: 100%;
+    background: linear-gradient(135deg, #111827, #374151);
+    color: white;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.04rem;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+}
+
+.cuisine-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.15), rgba(15, 23, 42, 0.75));
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cuisine-card-icon {
+    font-size: 3rem;
+    line-height: 1;
+    filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.25));
+}
+
+.cuisine-card .restaurant-card-body {
+    position: relative;
+    padding: 1rem 1rem 1.1rem;
+    background: linear-gradient(180deg, rgba(17, 24, 39, 0.05), rgba(17, 24, 39, 0.9));
+    color: white;
+    margin-top: auto;
+}
+
+.cuisine-card .restaurant-name {
+    font-size: 1.08rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: white;
+}
+
+.cuisine-card .rating-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.2rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: white;
+}
+
+.cuisine-card .stars-row {
+    display: flex;
+    gap: 0.18rem;
+    font-size: 0.95rem;
+    letter-spacing: 0.05rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.cuisine-card .stars-row .star.filled {
+    color: #fbbf24;
+}
+
+.dish-slider {
+    position: relative;
+    overflow: hidden;
+}
+
+.dish-track {
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 0.75rem;
+}
+
+.dish-track::-webkit-scrollbar {
+    display: none;
+}
+
+.dish-card {
+    width: min(260px, 70vw);
+    min-width: 220px;
+    border-radius: 1.1rem;
+    overflow: hidden;
+    scroll-snap-align: start;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.dish-image {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block;
+}
+
+.dish-placeholder {
+    background: linear-gradient(135deg, #f3f4f6, #dbeafe);
+    color: #374151;
+}
+
+.dish-body {
+    padding: 1rem 1rem 1.2rem;
+}
+
+.dish-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.dish-price {
+    font-weight: 700;
+    color: #111827;
+    white-space: nowrap;
+}
+
+.dish-cuisine {
+    font-size: 0.8rem;
+    color: var(--app-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08rem;
+}
+
+.mini-stars .star,
+.stars-row .star {
+    display: inline-block;
+    color: rgba(148, 163, 184, 0.8);
+}
+
+.mini-stars .star.filled,
+.stars-row .star.filled {
+    color: #fbbf24;
+}
+
+.stars-row {
+    display: flex;
+    gap: 0.18rem;
+    font-size: 1rem;
+    line-height: 1;
+    letter-spacing: 0.05rem;
+}
+
+.stars-row.large {
+    font-size: 1.35rem;
+}
+
+.stars-row.small {
+    font-size: 0.85rem;
+}
+
+.review-card {
+    border-radius: 1.1rem;
+}
+
+.like-button {
+    border: 1px solid var(--app-border);
+    background: var(--app-surface);
+    color: var(--app-text);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+}
+
+.like-button:hover {
+    background: #f8fafc;
+}
+
+.review-text {
+    color: var(--app-text);
+    opacity: 0.82;
+    line-height: 1.7;
+}
+
+.empty-card {
+    border-radius: 1rem;
+    padding: 2rem;
+    color: var(--app-muted);
+}
+
+@media (max-width: 767.98px) {
+    .hero-overlay {
+        padding: 1.2rem;
+    }
+
+    .hero-card,
+    .hero-image {
+        min-height: 320px;
+        height: 320px;
+    }
+}

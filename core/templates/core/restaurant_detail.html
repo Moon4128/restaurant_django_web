@@ -1,0 +1,362 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="restaurant-detail-page">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+        <div>
+            <p class="text-uppercase fw-semibold text-muted mb-2 letter-spacing">Restaurant</p>
+            <h1 class="mb-0 display-5 fw-bold">{{ restaurant.name }}</h1>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-3">Book a table</button>
+        </div>
+    </div>
+
+    <section class="hero-card card border-0 overflow-hidden shadow-sm mb-4">
+        {% if restaurant.image %}
+            <img src="{{ restaurant.image.url }}" alt="{{ restaurant.name }}" class="hero-image">
+        {% else %}
+            <div class="hero-image hero-placeholder d-flex align-items-center justify-content-center">
+                <span class="text-uppercase fw-semibold">No photo</span>
+            </div>
+        {% endif %}
+
+        <div class="hero-overlay">
+            <div class="d-flex justify-content-between align-items-end gap-3 flex-wrap">
+                <div>
+                    <div class="stars-row large" data-rating="{{ restaurant.average_rating }}"></div>
+                    <div class="mt-2 text-white-50">{{ restaurant.average_rating }} average rating</div>
+                </div>
+                <div class="hero-badges d-flex gap-2 flex-wrap">
+                    {% for cuisine in restaurant.cuisines.all %}
+                        <span class="badge badge-soft">{{ cuisine.name }}</span>
+                    {% empty %}
+                        <span class="badge badge-soft">Cuisine</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="row g-4 mb-5">
+        <div class="col-lg-8">
+            <div class="card detail-panel border-0 shadow-sm h-100">
+                <div class="card-body p-4 p-lg-5">
+                    <h2 class="h3 fw-bold mb-3">About this place</h2>
+                    <p class="lead mb-3 text-body-secondary">
+                        A cozy dining experience with a warm atmosphere, carefully prepared dishes, and a menu designed for everyday indulgence.
+                    </p>
+
+                    <div class="d-flex flex-wrap gap-2 mt-4">
+                        {% for cuisine in restaurant.cuisines.all %}
+                            <span class="chip">{{ cuisine.name }}</span>
+                        {% empty %}
+                            <span class="chip">Italian</span>
+                            <span class="chip">Mediterranean</span>
+                            <span class="chip">Family style</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card detail-panel border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <h3 class="h5 fw-bold mb-3">Location</h3>
+                    <ul class="contact-list list-unstyled mb-0">
+                        <li class="mb-3">
+                            <i class="bi bi-geo-alt me-2"></i>
+                            {% if branch %}{{ branch.address }}{% else %}Non specified{% endif %}
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-telephone me-2"></i>
+                            {% if branch %}{{ branch.phone }}{% else %}Non specified {% endif %}
+                        </li>
+                        <li>
+                            <i class="bi bi-clock me-2"></i>
+                            Open daily · 10:00 — 23:00
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+            <h2 class="h3 fw-bold mb-0">Cuisine types</h2>
+            {% if selected_cuisine %}
+                <a href="{% url 'core:restaurant_detail' restaurant.pk %}" class="btn btn-link text-decoration-none p-0 fw-semibold text-body">All cuisines</a>
+            {% else %}
+                <button type="button" class="btn btn-link text-decoration-none p-0 fw-semibold text-body" disabled>All cuisines</button>
+            {% endif %}
+        </div>
+
+        <div class="restaurant-slider">
+            <div class="restaurant-track d-flex align-items-stretch gap-4 pb-3">
+                {% for cuisine in restaurant.cuisines.all %}
+                    <a href="{% url 'core:dish_list' %}?restaurant={{ restaurant.pk }}&cuisine={{ cuisine.id }}" class="cuisine-card-link {% if selected_cuisine and selected_cuisine.id == cuisine.id %}is-active{% endif %}">
+                        <article class="cuisine-card card border-0 shadow-sm" data-rating="5">
+                            {% if cuisine.image %}
+                                <div class="cuisine-card-image" style="background-image: url('{{ cuisine.image.url }}'); background-size: cover; background-position: center;">
+                                    <div class="cuisine-card-overlay d-flex align-items-center justify-content-center">
+                                        <span class="cuisine-card-icon" aria-label="{{ cuisine.name }}">{{ cuisine.emoji }}</span>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="cuisine-card-image d-flex align-items-center justify-content-center">
+                                    <span class="cuisine-card-icon" aria-label="{{ cuisine.name }}">{{ cuisine.emoji }}</span>
+                                </div>
+                            {% endif %}
+
+                            <div class="restaurant-card-body">
+                                <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                                    <h5 class="restaurant-name mb-0">{{ cuisine.name }}</h5>
+                                    <span class="rating-pill">{{ cuisine.dishes.count }}</span>
+                                </div>
+                                <div class="stars-row" aria-label="{{ cuisine.dishes.count }} dishes"></div>
+                            </div>
+                        </article>
+                    </a>
+                {% empty %}
+                    <div class="alert alert-light border w-100">No cuisines available yet.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section class="reviews-section mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+            <h2 class="h3 fw-bold mb-0">Reviews</h2>
+        </div>
+
+        <div class="review-list d-grid gap-3">
+            {% if reviews %}
+                {% for review in reviews %}
+                    <article class="review-card card border-0 shadow-sm" data-review-id="{{ review.pk }}">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+                                <div>
+                                    <div class="fw-bold">{{ review.user.username }}</div>
+                                    <div class="stars-row small" data-rating="{{ review.rating }}"></div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if user.is_authenticated %}
+                                        <form method="post" action="{% url 'core:review_like' review.pk %}" class="review-like-form" data-review-like-form>
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-light btn-sm rounded-pill like-button {% if review.likes.all|length and review.likes.all.0.user == user %}liked{% endif %}" aria-label="Like review" data-like-button>
+                                                <i class="bi bi-heart"></i>
+                                                <span data-like-count>{{ review.likes.count }}</span>
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <button type="button" class="btn btn-light btn-sm rounded-pill like-button" disabled>
+                                            <i class="bi bi-heart"></i>
+                                            <span>{{ review.likes.count }}</span>
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            {% if request.user == review.user or request.user.is_staff %}
+                                <div class="d-flex gap-2 mb-3">
+                                    <a href="{% url 'core:review_update' review.pk %}" class="btn btn-outline-secondary btn-sm">Edit</a>
+                                    <a href="{% url 'core:review_delete' review.pk %}" class="btn btn-outline-danger btn-sm">Delete</a>
+                                </div>
+                            {% endif %}
+
+                            <p class="review-text mb-0">{{ review.content }}</p>
+                        </div>
+                    </article>
+                {% endfor %}
+            {% else %}
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4 text-muted">No reviews yet. Be the first to leave one.</div>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    {% if user.is_authenticated %}
+        <section class="review-form-wrap mb-5" id="review-form">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-lg-5">
+                    <h3 class="h4 fw-bold mb-4">Leave a review</h3>
+                    <form method="post" action="{% url 'core:review_create' %}" enctype="multipart/form-data" id="reviewCreateForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="restaurant" value="{{ restaurant.id }}">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Your review</label>
+                                <textarea class="form-control" name="content" rows="5" placeholder="Tell us about the food, atmosphere, and service..." required></textarea>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Rating</label>
+                                <select class="form-select" name="rating" required>
+                                    <option value="5">5 stars</option>
+                                    <option value="4">4 stars</option>
+                                    <option value="3">3 stars</option>
+                                    <option value="2">2 stars</option>
+                                    <option value="1">1 star</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Photo</label>
+                                <input type="file" class="form-control" name="media" accept="image/*">
+                            </div>
+
+                            <div class="col-12 text-end">
+                                <button type="submit" class="btn btn-dark rounded-pill px-4">Submit review</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    {% else %}
+        <section class="review-form-wrap mb-5" id="review-form">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-lg-5 text-center">
+                    <h3 class="h4 fw-bold mb-3">Leave a review</h3>
+                    <p class="mb-0 text-muted">Please <a href="{% url 'core:login' %}">log in</a> to leave a review or like a review.</p>
+                </div>
+            </div>
+        </section>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{% static 'core/css/restaurant_detail.css' %}">
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return '';
+    }
+
+    function renderStars(node, rating) {
+        const value = Number(rating || 0);
+        const stars = Array.from({ length: 5 }, (_, index) => {
+            const filled = index < Math.round(value);
+            return '<span class="star ' + (filled ? 'filled' : '') + '" aria-hidden="true">★</span>';
+        }).join('');
+        node.innerHTML = stars;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const csrfToken = getCookie('csrftoken');
+
+        document.querySelectorAll('[data-rating]').forEach((node) => {
+            renderStars(node, node.dataset.rating);
+        });
+
+        const reviewForm = document.getElementById('reviewCreateForm');
+        if (reviewForm) {
+            reviewForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+
+                const formData = new FormData(reviewForm);
+                const response = await fetch(reviewForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData,
+                    credentials: 'same-origin'
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    alert('Review could not be saved. Please check the form and try again.');
+                    return;
+                }
+
+                const reviewList = document.querySelector('.review-list');
+                if (reviewList) {
+                    const article = document.createElement('article');
+                    article.className = 'review-card card border-0 shadow-sm';
+                    article.dataset.reviewId = data.review_id;
+                    article.innerHTML = `
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+                                <div>
+                                    <div class="fw-bold">${data.username}</div>
+                                    <div class="stars-row small" data-rating="${data.rating}"></div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <form method="post" action="/reviews/${data.review_id}/like/" class="review-like-form" data-review-like-form>
+                                        <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
+                                        <button type="submit" class="btn btn-light btn-sm rounded-pill like-button liked" aria-label="Like review" data-like-button>
+                                            <i class="bi bi-heart"></i>
+                                            <span data-like-count>${data.likes_count}</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2 mb-3">
+                                <a href="/reviews/${data.review_id}/update/" class="btn btn-outline-secondary btn-sm">Edit</a>
+                                <a href="/reviews/${data.review_id}/delete/" class="btn btn-outline-danger btn-sm">Delete</a>
+                            </div>
+
+                            <p class="review-text mb-0">${data.content}</p>
+                        </div>
+                    `;
+                    reviewList.insertBefore(article, reviewList.firstChild);
+                    renderStars(article.querySelector('.stars-row'), data.rating);
+                    bindLikeForms();
+                }
+
+                reviewForm.reset();
+                document.getElementById('review-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
+
+        function bindLikeForms() {
+            document.querySelectorAll('[data-review-like-form]').forEach((form) => {
+                if (form.dataset.bound === 'true') return;
+                form.dataset.bound = 'true';
+                form.addEventListener('submit', async function(event) {
+                    event.preventDefault();
+                    const button = form.querySelector('[data-like-button]');
+                    const countNode = form.querySelector('[data-like-count]');
+
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: new FormData(form),
+                        credentials: 'same-origin'
+                    });
+
+                    const data = await response.json();
+                    if (!response.ok) return;
+
+                    if (countNode) {
+                        countNode.textContent = data.count;
+                    }
+
+                    if (button) {
+                        button.classList.toggle('liked', data.liked);
+                    }
+                });
+            });
+        }
+
+        bindLikeForms();
+    });
+</script>
+{% endblock %}

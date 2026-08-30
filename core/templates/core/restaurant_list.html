@@ -1,10 +1,91 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block content %}
-  <h1>Restaurant List</h1>
-  <ul>
-    {% for restaurant in restaurants %}
-      <li>{{ restaurant.name }} - {{ restaurant.city.name }}</li>
-    {% endfor %}
-  </ul>
+  <div class="restaurant-showcase">
+    <div class="d-flex justify-content-between align-items-center mb-4 gap-3 flex-wrap">
+      <div>
+        <p class="text-uppercase fw-semibold text-muted mb-1 letter-spacing">Explore</p>
+        <h1 class="mb-0 display-6 fw-bold">Restaurants</h1>
+      </div>
+
+      <div class="d-flex align-items-center gap-2">
+        <button type="button" class="btn btn-light rounded-circle shadow-sm carousel-btn" data-direction="prev" aria-label="Previous restaurants">
+          <span aria-hidden="true">‹</span>
+        </button>
+        <button type="button" class="btn btn-dark rounded-circle shadow-sm carousel-btn" data-direction="next" aria-label="Next restaurants">
+          <span aria-hidden="true">›</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="restaurant-slider">
+      <div class="restaurant-track d-flex align-items-stretch gap-4 pb-3">
+        {% for restaurant in restaurants %}
+          <a href="{% url 'core:restaurant_detail' restaurant.id %}" class="restaurant-card-link">
+            <article class="restaurant-card card border-0 shadow-sm" data-rating="{{ restaurant.average_rating }}">
+              {% if restaurant.image %}
+                <img src="{{ restaurant.image.url }}" class="card-img-top" alt="{{ restaurant.name }}" loading="lazy">
+              {% else %}
+                <div class="card-image-placeholder d-flex align-items-center justify-content-center">
+                  <span class="text-uppercase fw-semibold">No photo</span>
+                </div>
+              {% endif %}
+
+              <div class="restaurant-card-body">
+                <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                  <h5 class="restaurant-name mb-0">{{ restaurant.name }}</h5>
+                  <span class="rating-pill">{{ restaurant.average_rating }}</span>
+                </div>
+                <div class="stars-row" aria-label="{{ restaurant.average_rating }} out of 5 stars"></div>
+              </div>
+            </article>
+          </a>
+        {% empty %}
+          <div class="alert alert-light border w-100">No restaurants available yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{% static 'core/css/restaurant_list.css' %}">
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const cards = document.querySelectorAll('.restaurant-card');
+
+      cards.forEach((card) => {
+        const rating = Number(card.dataset.rating || 0);
+        const starsRow = card.querySelector('.stars-row');
+        const stars = Array.from({ length: 5 }, (_, index) => {
+          const isFilled = index < Math.round(rating);
+          return '<span class="star ' + (isFilled ? 'filled' : '') + '" aria-hidden="true">★</span>';
+        }).join('');
+        starsRow.innerHTML = stars;
+      });
+
+      const slider = document.querySelector('.restaurant-track');
+      const buttons = document.querySelectorAll('.carousel-btn');
+
+      buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+          if (!slider) return;
+
+          const direction = button.dataset.direction === 'next' ? 1 : -1;
+          const cardWidth = slider.querySelector('.restaurant-card')?.getBoundingClientRect().width || 240;
+          const gap = 24;
+
+          slider.scrollBy({
+            left: (cardWidth + gap) * direction,
+            behavior: 'smooth'
+          });
+        });
+      });
+    });
+  </script>
 {% endblock %}

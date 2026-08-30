@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="h3 mb-3">{% if object %}Edit Review{% else %}Write a Review{% endif %}</h2>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.non_field_errors }}
+
+                    {% if form.restaurant %}
+                        {{ form.restaurant.as_hidden }}
+                    {% endif %}
+
+                    {% if form.dish %}
+                        {{ form.dish.as_hidden }}
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Rating</label>
+                        {{ form.rating }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Review</label>
+                        {{ form.content }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Media</label>
+                        {{ form.media }}
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-dark">Save</button>
+                        {% if object %}
+                            <a class="btn btn-outline-secondary" href="{% url 'core:restaurant_detail' object.restaurant.pk %}">Go back</a>
+                        {% else %}
+                            <a class="btn btn-outline-secondary" href="{% url 'core:restaurant_list' %}">Go back</a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

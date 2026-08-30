@@ -1,95 +1,14 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Collection</title>
+    <title>Restaurants</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <style>
-        :root {
-            color-scheme: light;
-            --app-bg: #f3f4f6;
-            --app-surface: #ffffff;
-            --app-surface-muted: #f8f9fa;
-            --app-border: #d1d5db;
-            --app-text: #1f2937;
-            --app-muted: #6b7280;
-            --app-accent: #4b5563;
-            --app-accent-strong: #374151;
-            --app-shadow: rgba(15, 23, 42, 0.08);
-        }
-
-        [data-bs-theme="dark"] {
-            color-scheme: dark;
-            --app-bg: #111827;
-            --app-surface: #1f2937;
-            --app-surface-muted: #374151;
-            --app-border: #4b5563;
-            --app-text: #f3f4f6;
-            --app-muted: #cbd5e1;
-            --app-accent: #d1d5db;
-            --app-accent-strong: #e5e7eb;
-            --app-shadow: rgba(0, 0, 0, 0.25);
-        }
-
-        body {
-            background: linear-gradient(135deg, var(--app-bg) 0%, var(--app-surface-muted) 100%);
-            color: var(--app-text);
-            min-height: 100vh;
-        }
-
-        .navbar,
-        .card,
-        .list-group-item,
-        .alert,
-        .form-control,
-        .form-select,
-        .form-textarea {
-            background-color: var(--app-surface) !important;
-            color: var(--app-text) !important;
-            border-color: var(--app-border) !important;
-            box-shadow: 0 10px 30px var(--app-shadow);
-        }
-
-        .navbar-brand,
-        .nav-link,
-        .text-muted,
-        .small,
-        .card-title,
-        .card-text {
-            color: var(--app-text) !important;
-        }
-
-        .text-muted {
-            color: var(--app-muted) !important;
-        }
-
-        .hero-panel {
-            background: linear-gradient(135deg, var(--app-surface) 0%, var(--app-surface-muted) 100%);
-        }
-
-        .btn-outline-secondary {
-            border-color: var(--app-border);
-            color: var(--app-text);
-        }
-
-        .btn-outline-secondary:hover {
-            background-color: var(--app-accent);
-            color: var(--app-surface);
-        }
-
-        .page-shell {
-            padding: 2rem 0 3rem;
-        }
-
-        input,
-        select,
-        textarea {
-            background-color: var(--app-surface) !important;
-            color: var(--app-text) !important;
-            border-color: var(--app-border) !important;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{% static 'core/css/base.css' %}">
+    {% block styles %}{% endblock %}
 </head>
 <body>
     <header class="sticky-top">
@@ -102,27 +21,80 @@
                 <div class="collapse navbar-collapse" id="mainNavbar">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Restaurants</a>
+                            <a class="nav-link" href="{% url 'core:restaurant_list' %}">Restaurants</a>
                         </li>
                         {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="#">My orders</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Profile</a>
+                            <a class="nav-link" href="#">Orders History</a>
                         </li>
                         {% endif %}
                     </ul>
-                    <div class="d-flex align-items-center gap-2">
-                        <button type="button" class="btn btn-outline-secondary btn-sm" id="themeToggle" aria-label="Toggle theme">🌙</button>
+
+                    <div class="d-flex align-items-center gap-2 ms-auto">
+                        <form class="navbar-search d-flex align-items-center" role="search" action="{% url 'core:restaurant_list' %}" method="get">
+                            <i class="bi bi-search text-muted"></i>
+                            <input class="form-control border-0" type="search" name="q" value="{{ request.GET.q }}" placeholder="Search" aria-label="Search restaurants">
+                        </form>
+
+                        <div class="filter-dropdown">
+                            <button type="button" class="btn filter-button" data-bs-toggle="collapse" data-bs-target="#filterMenu" aria-expanded="false" aria-controls="filterMenu" aria-label="Filter">
+                                <i class="bi bi-sliders"></i>
+                            </button>
+
+                            <div id="filterMenu" class="filter-menu collapse">
+                                <form action="{% url 'core:restaurant_list' %}" method="get" class="filter-form">
+                                    {% if request.GET.q %}
+                                        <input type="hidden" name="q" value="{{ request.GET.q }}">
+                                    {% endif %}
+
+                                    <div class="mb-2">
+                                        <label class="form-label small mb-1">City</label>
+                                        <select class="form-select form-select-sm" name="city">
+                                            <option value="">All cities</option>
+                                            {% for city in all_cities %}
+                                                <option value="{{ city.id }}" {% if request.GET.city == city.id|stringformat:'s' %}selected{% endif %}>{{ city.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label small mb-1">Cuisine</label>
+                                        <div class="filter-chip-group">
+                                            <label class="filter-chip {% if not selected_cuisine_ids %}active{% endif %}">
+                                                <input type="checkbox" class="cuisine-select-all" name="cuisine" value="" {% if not selected_cuisine_ids %}checked{% endif %}>
+                                                <span>All</span>
+                                            </label>
+                                            {% for cuisine in all_cuisines %}
+                                                <label class="filter-chip {% if cuisine.id|stringformat:'s' in selected_cuisine_ids %}active{% endif %}">
+                                                    <input type="checkbox" class="cuisine-option" name="cuisine" value="{{ cuisine.id }}" {% if cuisine.id|stringformat:'s' in selected_cuisine_ids %}checked{% endif %}>
+                                                    <span>{{ cuisine.name }}</span>
+                                                </label>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-dark btn-sm w-100">Apply</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn icon-button cart-button" aria-label="Cart">
+                            <i class="bi bi-bag"></i>
+                            <span class="cart-count">3</span>
+                        </button>
+
+                        <button type="button" class="btn btn-outline-secondary btn-sm icon-button" id="themeToggle" aria-label="Toggle theme">🌙</button>
+
                         {% if user.is_authenticated %}
-                        <span class="navbar-text small text-muted me-2">{{ request.user.username }}</span>
-                        <form method="post" action="#" class="d-inline">
+                        <button type="button" class="btn avatar-button" aria-label="Profile" title="{{ request.user.username }}">
+                            {{ request.user.username|slice:':2'|upper }}
+                        </button>
+                        <form method="post" action="{% url 'core:logout' %}" class="d-inline">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-outline-secondary btn-sm">Logout</button>
                         </form>
                         {% else %}
-                        <a class="btn btn-outline-secondary btn-sm" href="#">Login</a>
+                        <a class="btn btn-outline-secondary btn-sm" href="{% url 'core:login' %}">Login</a>
                         {% endif %}
                     </div>
                 </div>
@@ -162,9 +134,47 @@
                 applyTheme(nextTheme);
             });
         }
+
+        const cuisineAllCheckbox = document.querySelector('.cuisine-select-all');
+        const cuisineOptionCheckboxes = document.querySelectorAll('.cuisine-option');
+
+        const syncCuisineChips = () => {
+            document.querySelectorAll('.filter-chip').forEach((chip) => {
+                const input = chip.querySelector('input[type="checkbox"]');
+                if (!input) return;
+                chip.classList.toggle('active', input.checked);
+            });
+
+            if (cuisineAllCheckbox) {
+                const anyCuisineSelected = Array.from(cuisineOptionCheckboxes).some((input) => input.checked);
+                cuisineAllCheckbox.checked = !anyCuisineSelected;
+                cuisineAllCheckbox.closest('.filter-chip')?.classList.toggle('active', !anyCuisineSelected);
+            }
+        };
+
+        if (cuisineAllCheckbox) {
+            cuisineAllCheckbox.addEventListener('change', () => {
+                if (cuisineAllCheckbox.checked) {
+                    cuisineOptionCheckboxes.forEach((input) => {
+                        input.checked = false;
+                    });
+                }
+                syncCuisineChips();
+            });
+        }
+
+        cuisineOptionCheckboxes.forEach((checkbox) => {
+            checkbox.addEventListener('change', () => {
+                if (checkbox.checked) {
+                    cuisineAllCheckbox.checked = false;
+                }
+                syncCuisineChips();
+            });
+        });
+
+        syncCuisineChips();
     </script>
 
     {% block scripts %}{% endblock %}
-    
 </body>
 </html>

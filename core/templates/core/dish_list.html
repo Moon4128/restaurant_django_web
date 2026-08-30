@@ -1,0 +1,11 @@
+ {extends 'base.html'}
+{% block content%}
+<div>
+    <h1> Dish List </h1>
+    {% for dish in dishes %}
+        <img src="{{ dish.image.url }}" alt="{{ dish.name }}" width="200" height="200">
+        <p>{{ dish.name }}</p>
+    {% endfor %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="order-page py-4">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="{% url 'core:restaurant_list' %}" class="btn btn-light rounded-circle shadow-sm" aria-label="Back to restaurants" title="Back to restaurants"><i class="bi bi-arrow-left"></i></a>
+        <div>
+            <p class="text-uppercase fw-semibold text-muted mb-1 letter-spacing">Account</p>
+            <h1 class="display-6 fw-bold mb-0">Order history</h1>
+        </div>
+    </div>
+
+    <div class="d-grid gap-3">
+        {% for order in orders %}
+            <div class="order-history-card card border-0 shadow-sm">
+                    <div class="card-body p-4 d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                    <a href="{% url 'core:order_detail' order.pk %}" class="text-decoration-none text-reset">
+                        <p class="text-muted mb-1">{{ order.created_at|date:'d M Y, H:i' }}</p>
+                        <h2 class="h5 mb-1">Order #{{ order.pk }}</h2>
+                        <span class="text-muted">{{ order.items.all|length }} line item{{ order.items.all|length|pluralize }}</span>
+                    </a>
+                    <div class="text-end">
+                        <span class="order-status">{{ order.get_status_display }}</span>
+                        <strong class="d-block mt-2">{{ order.total|floatformat:2 }}</strong>
+                        <form method="post" action="{% url 'core:reorder' order.pk %}" class="mt-2">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-dark btn-sm rounded-pill">Repeat order</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="card border-0 shadow-sm"><div class="card-body p-5 text-center text-muted">You have no orders yet.</div></div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'core/css/orders.css' %}?v=20260906">
+{% endblock %}

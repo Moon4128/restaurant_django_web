@@ -67,6 +67,25 @@
     color: var(--app-text);
 }
 
+.restaurant-slider {
+    position: relative;
+    overflow: hidden;
+}
+
+.restaurant-track {
+    display: flex;
+    align-items: stretch;
+    gap: 1.5rem;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.restaurant-track::-webkit-scrollbar {
+    display: none;
+}
+
 .cuisine-card {
     width: min(280px, 70vw);
     min-width: 220px;
@@ -77,7 +96,7 @@
     box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
     display: flex;
     flex-direction: column;
-    min-height: 100%;
+    flex: 0 0 min(280px, 70vw);
 }
 
 .cuisine-card-link {
@@ -258,6 +277,15 @@
 
 .review-card {
     border-radius: 1.1rem;
+}
+
+.review-media {
+    display: block;
+    width: min(100%, 420px);
+    max-height: 320px;
+    object-fit: cover;
+    border-radius: 0.9rem;
+    border: 1px solid var(--app-border);
 }
 
 .like-button {

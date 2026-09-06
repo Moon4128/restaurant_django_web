@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="cart-page py-4">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="{% url 'core:restaurant_list' %}" class="btn btn-light rounded-circle shadow-sm" aria-label="Back to restaurants" title="Back to restaurants">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <p class="text-uppercase fw-semibold text-muted mb-1 letter-spacing">Order</p>
+            <h1 class="display-6 fw-bold mb-0">Your cart</h1>
+        </div>
+    </div>
+
+    {% if items %}
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="d-grid gap-3">
+                    {% for item in items %}
+                        <article class="cart-item card border-0 shadow-sm">
+                            <div class="card-body p-3 d-flex align-items-center gap-3" data-cart-item="{{ item.dish.pk }}">
+                                {% if item.dish.image %}
+                                    <img src="{{ item.dish.image.url }}" alt="{{ item.dish.name }}" class="cart-item-image">
+                                {% else %}
+                                    <div class="cart-item-image cart-item-placeholder">No image</div>
+                                {% endif %}
+                                <div class="flex-grow-1">
+                                    <h2 class="h5 mb-1">{{ item.dish.name }}</h2>
+                                    <p class="text-muted mb-1">{{ item.dish.restaurant.name }}</p>
+                                    <span class="text-muted"><span data-item-price>{{ item.dish.price }}</span> x <span data-item-quantity>{{ item.quantity }}</span></span>
+                                </div>
+                                <strong data-item-subtotal>{{ item.subtotal }}</strong>
+                                <div class="quantity-controls" aria-label="Quantity for {{ item.dish.name }}">
+                                    <button type="button" class="btn btn-light rounded-circle quantity-button" data-cart-action="decrease" aria-label="Decrease quantity"><i class="bi bi-dash"></i></button>
+                                    <span class="quantity-value" data-item-quantity>{{ item.quantity }}</span>
+                                    <button type="button" class="btn btn-light rounded-circle quantity-button" data-cart-action="increase" aria-label="Increase quantity"><i class="bi bi-plus"></i></button>
+                                </div>
+                                <form method="post" action="{% url 'core:cart_remove' item.dish.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-light rounded-circle" aria-label="Remove {{ item.dish.name }}" title="Remove from cart"><i class="bi bi-trash3"></i></button>
+                                </form>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <aside class="cart-summary card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h2 class="h5 fw-bold mb-3">Order summary</h2>
+                        <div class="d-flex justify-content-between mb-3"><span>Items</span><span data-cart-count>{{ cart_count }}</span></div>
+                        <div class="d-flex justify-content-between border-top pt-3"><strong>Total</strong><strong data-cart-total>{{ total }}</strong></div>
+                        <a href="{% url 'core:checkout' %}" class="btn btn-dark rounded-pill w-100 mt-4">Checkout</a>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    {% else %}
+        <div class="card border-0 shadow-sm"><div class="card-body p-5 text-center text-muted">Your cart is empty.</div></div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'core/css/cart.css' %}?v=20260906">
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+    function updateCartBadge(count) {
+        const cartButton = document.querySelector('.cart-button');
+        if (!cartButton) return;
+        let badge = cartButton.querySelector('.cart-count');
+        if (count > 0 && !badge) {
+            badge = document.createElement('span');
+            badge.className = 'cart-count';
+            cartButton.appendChild(badge);
+        }
+        if (badge) {
+            badge.textContent = count;
+            badge.hidden = count < 1;
+        }
+    }
+
+    document.querySelectorAll('[data-cart-action]').forEach((button) => button.addEventListener('click', async function () {
+        const item = button.closest('[data-cart-item]');
+        const response = await fetch(`/cart/update/${item.dataset.cartItem}/`, {
+            method: 'POST',
+            headers: {'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/x-www-form-urlencoded'},
+            body: `action=${button.dataset.cartAction}`
+        });
+        if (!response.ok) return;
+        const data = await response.json();
+        if (data.quantity < 1) {
+            item.remove();
+        } else {
+            item.querySelectorAll('[data-item-quantity]').forEach((node) => node.textContent = data.quantity);
+            item.querySelector('[data-item-subtotal]').textContent = data.subtotal;
+        }
+        document.querySelector('[data-cart-count]').textContent = data.cart_count;
+        document.querySelector('[data-cart-total]').textContent = data.total;
+        updateCartBadge(data.cart_count);
+        if (data.cart_count < 1) window.location.reload();
+    }));
+});
+</script>
+{% endblock %}

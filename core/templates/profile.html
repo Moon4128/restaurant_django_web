@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="profile-page py-4">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="{% url 'core:restaurant_list' %}" class="btn btn-light rounded-circle shadow-sm" aria-label="Back" title="Back"><i class="bi bi-arrow-left"></i></a>
+        <div><p class="text-uppercase fw-semibold text-muted mb-1 letter-spacing">Account</p><h1 class="display-6 fw-bold mb-0">My profile</h1></div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <section class="card border-0 shadow-sm profile-panel mb-4">
+                <div class="card-body p-4 p-lg-5">
+                    <h2 class="h5 fw-bold mb-4">Personal details</h2>
+                    <form method="post">
+                        {% csrf_token %}<input type="hidden" name="form_type" value="profile">
+                        {% for field in profile_form %}<div class="mb-3"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>{% endfor %}
+                        <button class="btn btn-dark rounded-pill px-4" type="submit">Save details</button>
+                    </form>
+                </div>
+            </section>
+
+            <section class="card border-0 shadow-sm profile-panel">
+                <div class="card-body p-4 p-lg-5">
+                    <h2 class="h5 fw-bold mb-4">Change password</h2>
+                    <form method="post">
+                        {% csrf_token %}<input type="hidden" name="form_type" value="password">
+                        {% for field in password_form %}<div class="mb-3"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>{% endfor %}
+                        <button class="btn btn-outline-dark rounded-pill px-4" type="submit">Update password</button>
+                    </form>
+                </div>
+            </section>
+        </div>
+
+        <div class="col-lg-5">
+            <section class="card border-0 shadow-sm profile-panel">
+                <div class="card-body p-4 text-center">
+                    {% if user_profile.avatar %}<img src="{{ user_profile.avatar.url }}" alt="Profile avatar" class="profile-avatar mb-3">{% else %}<div class="profile-avatar profile-avatar-placeholder mb-3">{{ request.user.username|slice:':2'|upper }}</div>{% endif %}
+                    <h2 class="h5 fw-bold">{{ request.user.username }}</h2>
+                    <form method="post" enctype="multipart/form-data" class="mt-4 text-start">
+                        {% csrf_token %}<input type="hidden" name="form_type" value="avatar">
+                        <label class="form-label" for="{{ avatar_form.avatar.id_for_label }}">Profile photo</label>
+                        {{ avatar_form.avatar }}{{ avatar_form.avatar.errors }}
+                        <button class="btn btn-outline-dark rounded-pill px-4 mt-3" type="submit">Upload avatar</button>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'core/css/profile.css' %}?v=20260906">
+{% endblock %}

@@ -1,11 +1,73 @@
- {extends 'base.html'}
-{% block content%}
-<div>
-    <h1> Dish List </h1>
-    {% for dish in dishes %}
-        <img src="{{ dish.image.url }}" alt="{{ dish.name }}" width="200" height="200">
-        <p>{{ dish.name }}</p>
-    {% endfor %}
-</div>
+{% extends 'base.html' %}
 
+{% load static %}
+
+{% block content %}
+<div class="dish-page">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        {% if restaurant %}
+            <a href="{% url 'core:restaurant_detail' restaurant.pk %}" class="btn btn-light rounded-circle shadow-sm" aria-label="Back to restaurant" title="Back to restaurant">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+        {% else %}
+            <a href="{% url 'core:restaurant_list' %}" class="btn btn-light rounded-circle shadow-sm" aria-label="Back to restaurants" title="Back to restaurants">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+        {% endif %}
+        <div>
+            <p class="text-uppercase fw-semibold text-muted mb-1 letter-spacing">Menu</p>
+            <h1 class="mb-0 display-6 fw-bold">
+                {% if selected_cuisine %}{{ selected_cuisine.name }} dishes{% else %}Dish list{% endif %}
+            </h1>
+            {% if restaurant %}
+                <p class="text-muted mb-0 mt-1">{{ restaurant.name }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="dish-grid">
+        {% for dish in dishes %}
+            <a href="{% url 'core:dish_detail' dish.pk %}" class="dish-card-link">
+                <article class="dish-card card" data-rating="{{ dish.average_rating }}">
+                    {% if dish.image %}
+                        <img src="{{ dish.image.url }}" class="dish-card-image" alt="{{ dish.name }}" loading="lazy">
+                    {% else %}
+                        <div class="dish-image-placeholder">
+                            <span>Image not found</span>
+                        </div>
+                    {% endif %}
+
+                    <div class="dish-card-body">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <h2 class="dish-name mb-0">{{ dish.name }}</h2>
+                            <span class="dish-price">{{ dish.price }}</span>
+                        </div>
+                    </div>
+                </article>
+            </a>
+        {% empty %}
+            <div class="alert alert-light border w-100">No dishes found for this cuisine yet.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'core/css/dish_list.css' %}">
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.dish-card').forEach((card) => {
+            const rating = Number(card.dataset.rating || 0);
+            const starsRow = card.querySelector('.stars-row');
+            const stars = Array.from({ length: 5 }, (_, index) => {
+                const isFilled = index < Math.round(rating);
+                return '<span class="star ' + (isFilled ? 'filled' : '') + '" aria-hidden="true">★</span>';
+            }).join('');
+            starsRow.innerHTML = stars;
+        });
+    });
+</script>
 {% endblock %}

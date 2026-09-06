@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="order-page py-4">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="{% url 'core:order_history' %}" class="btn btn-light rounded-circle shadow-sm" aria-label="Back to order history" title="Back to order history"><i class="bi bi-arrow-left"></i></a>
+        <div>
+            <p class="text-uppercase fw-semibold text-muted mb-1 letter-spacing">Order details</p>
+            <h1 class="display-6 fw-bold mb-0">Order #{{ order.pk }}</h1>
+        </div>
+    </div>
+
+    <div class="order-detail-header card border-0 shadow-sm mb-4">
+        <div class="card-body p-4 d-flex justify-content-between align-items-center gap-3 flex-wrap">
+            <div>
+                <span class="text-muted">Placed {{ order.created_at|date:'d M Y, H:i' }}</span><br>
+                <span class="text-muted">{{ order.get_fulfillment_type_display }} · {{ order.get_payment_method_display }}</span>
+            </div>
+            <span class="order-status">{{ order.get_status_display }}</span>
+        </div>
+    </div>
+
+    <form method="post" action="{% url 'core:reorder' order.pk %}" class="mb-4">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-dark rounded-pill"><i class="bi bi-arrow-repeat me-2"></i>Repeat order</button>
+    </form>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-6"><div class="card border-0 shadow-sm h-100"><div class="card-body p-4"><h2 class="h6 fw-bold">Contact</h2><p class="mb-0">{{ order.customer_name }}<br>{{ order.phone }}</p></div></div></div>
+        <div class="col-md-6"><div class="card border-0 shadow-sm h-100"><div class="card-body p-4"><h2 class="h6 fw-bold">{% if order.fulfillment_type == 'delivery' %}Delivery address{% else %}Pickup{% endif %}</h2><p class="mb-0">{% if order.fulfillment_type == 'delivery' %}{{ order.city }}, {{ order.address }}{% if order.apartment %}<br>{{ order.apartment }}{% endif %}{% else %}Pick up at the restaurant{% endif %}</p></div></div></div>
+    </div>
+
+    {% if order.payment_method == 'card' %}<p class="text-muted small">Paid by card ending in •••• {{ order.payment_last4 }}</p>{% else %}<p class="text-muted small">Payment is due on receipt.</p>{% endif %}
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            {% for item in order.items.all %}
+                <div class="d-flex justify-content-between align-items-center gap-3 py-3 {% if not forloop.last %}border-bottom{% endif %}">
+                    <div><h2 class="h6 mb-1">{{ item.dish_name }}</h2><span class="text-muted">{{ item.unit_price|floatformat:2 }} x {{ item.quantity }}</span></div>
+                    <strong>{{ item.subtotal|floatformat:2 }}</strong>
+                </div>
+            {% endfor %}
+            <div class="d-flex justify-content-between border-top pt-3 mt-2"><strong>Total</strong><strong>{{ order.total|floatformat:2 }}</strong></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'core/css/orders.css' %}?v=20260906">
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="order-page py-4">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="{% url 'core:cart' %}" class="btn btn-light rounded-circle shadow-sm" aria-label="Back to cart" title="Back to cart"><i class="bi bi-arrow-left"></i></a>
+        <div>
+            <p class="text-uppercase fw-semibold text-muted mb-1 letter-spacing">Secure checkout</p>
+            <h1 class="display-6 fw-bold mb-0">Complete order</h1>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm order-panel">
+                <div class="card-body p-4 p-lg-5">
+                    <h2 class="h4 fw-bold mb-4">Delivery and payment</h2>
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {{ form.non_field_errors }}
+                        <div class="checkout-section">
+                            <h3 class="h6 fw-bold mb-3">Contact</h3>
+                            <div class="row g-3">
+                                <div class="col-md-6"><label class="form-label" for="id_customer_name">Full name</label>{{ form.customer_name }}{{ form.customer_name.errors }}</div>
+                                <div class="col-md-6"><label class="form-label" for="id_phone">Phone</label>{{ form.phone }}{{ form.phone.errors }}</div>
+                            </div>
+                        </div>
+
+                        <div class="checkout-section">
+                            <h3 class="h6 fw-bold mb-3">How do you want to receive it?</h3>
+                            <div class="choice-grid">
+                                <label class="choice-card"><input type="radio" name="fulfillment_type" value="delivery" checked><span><i class="bi bi-bicycle"></i><strong>Delivery</strong><small>To your address</small></span></label>
+                                <label class="choice-card"><input type="radio" name="fulfillment_type" value="pickup"><span><i class="bi bi-shop"></i><strong>Pick up</strong><small>Collect at the restaurant</small></span></label>
+                            </div>
+                        </div>
+
+                        <div class="checkout-section" id="deliveryFields">
+                            <h3 class="h6 fw-bold mb-3">Delivery address</h3>
+                            <div class="row g-3">
+                                <div class="col-md-6"><label class="form-label" for="id_city">City</label>{{ form.city }}{{ form.city.errors }}</div>
+                                <div class="col-md-6"><label class="form-label" for="id_address">Street and house</label>{{ form.address }}{{ form.address.errors }}</div>
+                                <div class="col-12"><label class="form-label" for="id_apartment">Apartment / entrance <span class="text-muted">(optional)</span></label>{{ form.apartment }}{{ form.apartment.errors }}</div>
+                            </div>
+                        </div>
+
+                        <div class="checkout-section">
+                            <label class="form-label" for="id_note">Note <span class="text-muted">(optional)</span></label>
+                            {{ form.note }}
+                            {{ form.note.errors }}
+                        </div>
+
+                        <div class="checkout-section">
+                            <h3 class="h6 fw-bold mb-3">Payment method</h3>
+                            <div class="choice-grid">
+                                <label class="choice-card"><input type="radio" name="payment_method" value="card" checked><span><i class="bi bi-credit-card"></i><strong>Pay now</strong><small>Card payment</small></span></label>
+                                <label class="choice-card"><input type="radio" name="payment_method" value="cash"><span><i class="bi bi-wallet2"></i><strong>Pay on receipt</strong><small>Cash or card on delivery</small></span></label>
+                            </div>
+                        </div>
+
+                        <div class="checkout-section" id="cardFields">
+                            <div class="d-flex justify-content-between align-items-center mb-3"><h3 class="h6 fw-bold mb-0">Card details</h3><span class="card-brands"><i class="bi bi-credit-card-2-front"></i> Secure demo checkout</span></div>
+                            <div class="mb-3"><label class="form-label" for="id_cardholder_name">Name on card</label>{{ form.cardholder_name }}{{ form.cardholder_name.errors }}</div>
+                            <div class="mb-3"><label class="form-label" for="id_card_number">Card number</label><div class="input-with-icon"><i class="bi bi-credit-card"></i>{{ form.card_number }}</div>{{ form.card_number.errors }}</div>
+                            <div class="row g-3"><div class="col-sm-6"><label class="form-label" for="id_expiry">Expiry date</label>{{ form.expiry }}{{ form.expiry.errors }}</div><div class="col-sm-6"><label class="form-label" for="id_cvv">CVV</label>{{ form.cvv }}{{ form.cvv.errors }}</div></div>
+                            <div class="form-text mt-3">Your full card number is used only for this demo payment and is never saved.</div>
+                        </div>
+                        <button type="submit" class="btn btn-dark rounded-pill w-100 mt-4">Place order</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <aside class="card border-0 shadow-sm order-panel">
+                <div class="card-body p-4">
+                    <h2 class="h5 fw-bold mb-3">Order summary</h2>
+                    {% for dish, quantity in items %}
+                        <div class="d-flex justify-content-between gap-3 mb-3">
+                            <span>{{ dish.name }} x {{ quantity }}</span>
+                            <strong>{{ dish.price|floatformat:2 }}</strong>
+                        </div>
+                    {% endfor %}
+                    <div class="d-flex justify-content-between border-top pt-3"><strong>Total</strong><strong>{{ total|floatformat:2 }}</strong></div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'core/css/orders.css' %}?v=20260906">
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const deliveryFields = document.getElementById('deliveryFields');
+    const cardFields = document.getElementById('cardFields');
+    const deliveryInputs = deliveryFields.querySelectorAll('input');
+    const cardInputs = cardFields.querySelectorAll('input');
+
+    function syncCheckoutSections() {
+        const delivery = document.querySelector('input[name="fulfillment_type"]:checked').value === 'delivery';
+        const card = document.querySelector('input[name="payment_method"]:checked').value === 'card';
+        deliveryFields.hidden = !delivery;
+        cardFields.hidden = !card;
+        deliveryInputs.forEach((input) => input.disabled = !delivery);
+        cardInputs.forEach((input) => input.disabled = !card);
+    }
+
+    document.querySelectorAll('input[name="fulfillment_type"], input[name="payment_method"]').forEach((input) => input.addEventListener('change', syncCheckoutSections));
+    syncCheckoutSections();
+
+    const cardNumber = document.getElementById('id_card_number');
+    cardNumber.addEventListener('input', () => {
+        cardNumber.value = cardNumber.value.replace(/\D/g, '').slice(0, 19).replace(/(.{4})/g, '$1 ').trim();
+    });
+
+    const expiry = document.getElementById('id_expiry');
+    expiry.addEventListener('input', () => {
+        const value = expiry.value.replace(/\D/g, '').slice(0, 4);
+        expiry.value = value.length > 2 ? value.slice(0, 2) + '/' + value.slice(2) : value;
+    });
+});
+</script>
+{% endblock %}

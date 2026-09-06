@@ -1,0 +1,46 @@
+.profile-panel {
+    border-radius: 1.1rem;
+}
+
+.profile-page input {
+    width: 100%;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--app-border);
+    border-radius: 0.65rem;
+    background: var(--app-surface);
+    color: var(--app-text);
+}
+
+.profile-avatar {
+    width: 128px;
+    height: 128px;
+    object-fit: cover;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-avatar-placeholder {
+    background: #111827;
+    color: white;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.avatar-button {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-button img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}

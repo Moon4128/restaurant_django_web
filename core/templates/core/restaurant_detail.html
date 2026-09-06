@@ -99,13 +99,9 @@
             <div class="restaurant-track d-flex align-items-stretch gap-4 pb-3">
                 {% for cuisine in restaurant.cuisines.all %}
                     <a href="{% url 'core:dish_list' %}?restaurant={{ restaurant.pk }}&cuisine={{ cuisine.id }}" class="cuisine-card-link {% if selected_cuisine and selected_cuisine.id == cuisine.id %}is-active{% endif %}">
-                        <article class="cuisine-card card border-0 shadow-sm" data-rating="5">
+                        <article class="cuisine-card card border-0 shadow-sm">
                             {% if cuisine.image %}
-                                <div class="cuisine-card-image" style="background-image: url('{{ cuisine.image.url }}'); background-size: cover; background-position: center;">
-                                    <div class="cuisine-card-overlay d-flex align-items-center justify-content-center">
-                                        <span class="cuisine-card-icon" aria-label="{{ cuisine.name }}">{{ cuisine.emoji }}</span>
-                                    </div>
-                                </div>
+                                <div class="cuisine-card-image" style="background-image: url('{{ cuisine.image.url }}'); background-size: cover; background-position: center;"></div>
                             {% else %}
                                 <div class="cuisine-card-image d-flex align-items-center justify-content-center">
                                     <span class="cuisine-card-icon" aria-label="{{ cuisine.name }}">{{ cuisine.emoji }}</span>
@@ -117,7 +113,7 @@
                                     <h5 class="restaurant-name mb-0">{{ cuisine.name }}</h5>
                                     <span class="rating-pill">{{ cuisine.dishes.count }}</span>
                                 </div>
-                                <div class="stars-row" aria-label="{{ cuisine.dishes.count }} dishes"></div>
+                                <div class="stars-row" data-rating="5" aria-label="{{ cuisine.dishes.count }} dishes"></div>
                             </div>
                         </article>
                     </a>
@@ -169,6 +165,9 @@
                             {% endif %}
 
                             <p class="review-text mb-0">{{ review.content }}</p>
+                            {% if review.media and review.is_image %}
+                                <img src="{{ review.media.url }}" alt="Photo attached to review by {{ review.user.username }}" class="review-media mt-3">
+                            {% endif %}
                         </div>
                     </article>
                 {% endfor %}
@@ -232,7 +231,7 @@
 {% endblock %}
 
 {% block styles %}
-  <link rel="stylesheet" href="{% static 'core/css/restaurant_detail.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/restaurant_detail.css' %}?v=20260906">
 {% endblock %}
 
 {% block scripts %}
@@ -311,6 +310,7 @@
                             </div>
 
                             <p class="review-text mb-0">${data.content}</p>
+                            ${data.media_url ? '<img src="' + data.media_url + '" alt="Photo attached to review" class="review-media mt-3">' : ''}
                         </div>
                     `;
                     reviewList.insertBefore(article, reviewList.firstChild);

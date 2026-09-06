@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="dish-detail-page">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="{% url 'core:dish_list' %}?restaurant={{ restaurant.pk }}&cuisine={{ dish.cuisine.pk }}" class="btn btn-light rounded-circle shadow-sm" aria-label="Back to dishes" title="Back to dishes">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <p class="text-uppercase fw-semibold text-muted mb-1 letter-spacing">{{ dish.cuisine.name }}</p>
+            <h1 class="mb-0 display-6 fw-bold">{{ dish.name }}</h1>
+        </div>
+    </div>
+
+    <section class="dish-detail-hero card border-0 shadow-sm mb-5">
+        <div class="row g-0">
+            <div class="col-lg-6">
+                {% if dish.image %}
+                    <img src="{{ dish.image.url }}" alt="{{ dish.name }}" class="dish-detail-image">
+                {% else %}
+                    <div class="dish-detail-image dish-detail-placeholder">Image not found</div>
+                {% endif %}
+            </div>
+            <div class="col-lg-6">
+                <div class="dish-detail-content">
+                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                        <div>
+                            <p class="text-muted mb-1">{{ restaurant.name }}</p>
+                            <div class="stars-row dish-rating" data-rating="{{ dish.average_rating }}" aria-label="{{ dish.average_rating }} out of 5 stars"></div>
+                        </div>
+                        <strong class="dish-detail-price">{{ dish.price }}</strong>
+                    </div>
+                    <p class="dish-detail-description">
+                        {% if dish.description %}{{ dish.description }}{% else %}No description available.{% endif %}
+                    </p>
+                    {% if user.is_authenticated %}
+                        <form method="post" action="{% url 'core:cart_add' dish.pk %}" class="add-cart-form mt-4">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-dark rounded-pill px-4 add-cart-button">
+                                <i class="bi bi-bag-plus me-2"></i>Add to cart
+                            </button>
+                            <span class="cart-feedback text-success ms-2" aria-live="polite"></span>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'core:login' %}?next={{ request.path }}" class="btn btn-dark rounded-pill px-4 mt-4">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Log in to order
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="reviews-section mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+            <h2 class="h3 fw-bold mb-0">Reviews for {{ dish.name }}</h2>
+        </div>
+        <div class="review-list d-grid gap-3">
+            {% for review in reviews %}
+                <article class="review-card card border-0 shadow-sm" data-review-id="{{ review.pk }}">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+                            <div>
+                                <div class="fw-bold">{{ review.user.username }}</div>
+                                <div class="stars-row small" data-rating="{{ review.rating }}"></div>
+                            </div>
+                            {% if user.is_authenticated %}
+                                <form method="post" action="{% url 'core:review_like' review.pk %}" class="review-like-form" data-review-like-form>
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-light btn-sm rounded-pill like-button" data-like-button aria-label="Like review">
+                                        <i class="bi bi-heart"></i> <span data-like-count>{{ review.likes.count }}</span>
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                        {% if request.user == review.user or request.user.is_staff %}
+                            <div class="d-flex gap-2 mb-3">
+                                <a href="{% url 'core:review_update' review.pk %}" class="btn btn-outline-secondary btn-sm">Edit</a>
+                                <a href="{% url 'core:review_delete' review.pk %}" class="btn btn-outline-danger btn-sm">Delete</a>
+                            </div>
+                        {% endif %}
+                        <p class="review-text mb-0">{{ review.content }}</p>
+                        {% if review.media and review.is_image %}
+                            <img src="{{ review.media.url }}" alt="Photo attached to review" class="review-media mt-3">
+                        {% endif %}
+                    </div>
+                </article>
+            {% empty %}
+                <div class="card border-0 shadow-sm"><div class="card-body p-4 text-muted">No reviews yet. Be the first to review this dish.</div></div>
+            {% endfor %}
+        </div>
+    </section>
+
+    {% if user.is_authenticated %}
+        <section class="review-form-wrap mb-5" id="review-form">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-lg-5">
+                    <h3 class="h4 fw-bold mb-4">Leave a review</h3>
+                    <form method="post" action="{% url 'core:review_create' %}" enctype="multipart/form-data" id="dishReviewForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="restaurant" value="{{ restaurant.pk }}">
+                        <input type="hidden" name="dish" value="{{ dish.pk }}">
+                        <div class="row g-3">
+                            <div class="col-12"><textarea class="form-control" name="content" rows="5" placeholder="Tell us about this dish..." required></textarea></div>
+                            <div class="col-md-4"><select class="form-select" name="rating" required><option value="5">5 stars</option><option value="4">4 stars</option><option value="3">3 stars</option><option value="2">2 stars</option><option value="1">1 star</option></select></div>
+                            <div class="col-md-4"><input type="file" class="form-control" name="media" accept="image/*"></div>
+                            <div class="col-12 text-end"><button type="submit" class="btn btn-dark rounded-pill px-4">Submit review</button></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    {% else %}
+        <p class="text-muted">Please <a href="{% url 'core:login' %}">log in</a> to leave a review.</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'core/css/dish_detail.css' %}?v=20260906">
+{% endblock %}
+
+{% block scripts %}
+<script>
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    return parts.length === 2 ? parts.pop().split(';').shift() : '';
+}
+
+function renderStars(node, rating) {
+    const value = Number(rating || 0);
+    node.innerHTML = Array.from({ length: 5 }, (_, index) => '<span class="star ' + (index < Math.round(value) ? 'filled' : '') + '" aria-hidden="true">★</span>').join('');
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-rating]').forEach((node) => renderStars(node, node.dataset.rating));
+    const csrfToken = getCookie('csrftoken');
+
+    document.querySelectorAll('.add-cart-form').forEach((form) => form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const response = await fetch(form.action, { method: 'POST', headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' }, body: new FormData(form), credentials: 'same-origin' });
+        const data = await response.json();
+        if (data.success) {
+            form.querySelector('.cart-feedback').textContent = 'Added to cart';
+            updateCartBadge(data.cart_count);
+        }
+    }));
+
+    function updateCartBadge(count) {
+        const cartButton = document.querySelector('.cart-button');
+        if (!cartButton) return;
+        let badge = cartButton.querySelector('.cart-count');
+        if (count > 0 && !badge) {
+            badge = document.createElement('span');
+            badge.className = 'cart-count';
+            cartButton.appendChild(badge);
+        }
+        if (badge) {
+            badge.textContent = count;
+            badge.hidden = count < 1;
+        }
+    }
+
+    document.querySelectorAll('[data-review-like-form]').forEach((form) => form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const response = await fetch(form.action, { method: 'POST', headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' }, body: new FormData(form), credentials: 'same-origin' });
+        const data = await response.json();
+        if (response.ok) form.querySelector('[data-like-count]').textContent = data.count;
+    }));
+
+    const reviewForm = document.getElementById('dishReviewForm');
+    if (reviewForm) reviewForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const response = await fetch(reviewForm.action, { method: 'POST', headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' }, body: new FormData(reviewForm), credentials: 'same-origin' });
+        const data = await response.json();
+        if (response.ok && data.success) window.location.reload();
+    });
+});
+</script>
+{% endblock %}
